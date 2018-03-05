@@ -1,3 +1,8 @@
+# TER Titanic
+
+# Rq : Vérifier si val mq dans data de validation
+
+
 library(readr)
 
 setwd("./TER/trunk/Data")
@@ -70,4 +75,7 @@ train$catAge[train$catAge > 20 & train$catAge <= 40] = 2
 train$catAge[train$catAge > 40 & train$catAge <= 60] = 3
 train$catAge[train$catAge > 60] = 4
 
+attach(train)
+
+plot(Age,Fare)
 
