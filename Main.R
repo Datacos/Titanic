@@ -1,7 +1,7 @@
 library(readr)
 
-setwd("C://Titanic")
-train <- read_csv("Data/train.csv")
+setwd("./TER/trunk/Data")
+train <- read_csv("train.csv")
 attach(train)
 
 # Taille de notre échantillon :
@@ -20,13 +20,10 @@ sum(is.na(Cabin))/n
 # On trouve 77% de NA pour Cabin.
 
 # On regarde seulement si on a une Cabine ou non.
-for (i in 1:n) {
-  if(is.na(Cabin[i])){
-    train$hasCabin[i] = 0
-  } else {
-    train$hasCabin[i] = 1
-  }
-}
+train$hasCabin = train$Cabin
+train$hasCabin[!is.na(train$hasCabin)] = 1
+train$hasCabin[is.na(train$hasCabin)] = 0
+
 attach(train)
 
 # Var Embarked
@@ -61,26 +58,16 @@ table(Embarked)
 boxplot(Age) # => Cat
 boxplot(Fare) # => ???? Cat
 
-train$catFare = rep(3,n)
-for(i in 1:n) {
-  if(Fare[i] <= 100){
-    train$catFare[i] = 1
-  } else if(Fare[i] <= 200) {
-    train$catFare[i] = 2
-  } 
-}
+train$catFare = train$Fare
+train$catFare[train$catFare <= 100 ] = 1
+train$catFare[train$catFare <= 200 & train$catFare > 100 ] = 2
+train$catFare[train$catFare > 200 ] = 3
 
-train$catAge = rep(NA,n)
-for(i in 1:n) {
-  if (is.na(Age[i]) == FALSE){
-    if(Age[i] <= 20){
-      train$catAge[i] = 1
-    } else if(Age[i] <= 40) {
-      train$catAge[i] = 2
-    } else if(Age[i] <= 60) {
-      train$catAge[i] = 3
-    } else {
-      train$catAge[i] = 4
-    }
-  }
-}
+train$catAge = train$Age
+train$catAge[is.na(train$catAge)] = 0
+train$catAge[train$catAge > 0 & train$catAge <= 20] = 1
+train$catAge[train$catAge > 20 & train$catAge <= 40] = 2
+train$catAge[train$catAge > 40 & train$catAge <= 60] = 3
+train$catAge[train$catAge > 60] = 4
+
+
