@@ -2,7 +2,7 @@
 
 # Rq : Vérifier si val mq dans data de validation
 
-
+library(rpart)
 library(readr)
 
 setwd("./TER/trunk/Data")
@@ -78,4 +78,8 @@ train$catAge[train$catAge > 60] = 4
 attach(train)
 
 plot(Age,Fare)
+
+fit <- rpart(Survived ~ hasCabin + catAge + catFare + Sex + Parch +Pclass + SibSp +Embarked, data = train, method = 'class',control = rpart.control(minsplit = 30, cp=0.005))
+plot(fit)
+text(fit)
 
