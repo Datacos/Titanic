@@ -6,7 +6,7 @@ library(rpart)
 library(readr)
 
 setwd("./TER/trunk/Data")
-train <- read_csv("train.csv")
+train <- read_csv("Data/train.csv")
 attach(train)
 
 # Taille de notre échantillon :
@@ -82,4 +82,8 @@ plot(Age,Fare)
 fit <- rpart(Survived ~ hasCabin + catAge + catFare + Sex + Parch +Pclass + SibSp +Embarked, data = train, method = 'class',control = rpart.control(minsplit = 30, cp=0.005))
 plot(fit)
 text(fit)
+
+train1 = subset(train,select = -c(PassengerId,Age,Ticket,Fare,Cabin,Name))
+
+
 
