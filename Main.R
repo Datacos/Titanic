@@ -85,5 +85,67 @@ text(fit)
 
 train1 = subset(train,select = -c(PassengerId,Age,Ticket,Fare,Cabin,Name))
 
+div<-function(dataFrame,X,x){
+  return(subset(dataFrame,X == x))
+}
 
+divVal<-function(dataFrames,val){
+  list1 = list()
+  for (i in unique(val)){
+    div1 = div(dataFrames,val,i)  
+    list1 = c(list1,list(div1))
+  }
+  names(list1) <- unique(val)
+  return(list1)
+}
+
+tri<-function(listdata,Ystring){
+  listLen = length(listdata)
+  for (i in 1:listLen){
+    print(table(listdata[[i]][Ystring]))
+  }
+}
+
+gini<-function(dataFrames,Ystring){
+  cols <- names(dataFrames)[names(dataFrames) != Ystring]
+  G = list()
+  p = c()
+  for (i in cols) {
+    vals = c(unique(dataFrames[i]))
+    col <- eval(parse(text=i))
+    list = divVal(dataFrames,col)
+    for(j in unique(dataFrames[i])){
+      print(j)
+      m = length(t(list[[j]][Ystring]))
+      print(m)
+      card = table(list[[j]][Ystring])
+      p=(1/m)*card
+      print(p)
+      G[[i]][j] = 1 - sum(p^2)
+    }
+  }
+  return(G)
+}
+
+gini(train1,'Survived')
+
+table(div(train,hasCabin,0)$Survived)
+
+arbre<-function(dataFrames,Y,node = 1){
+  datalen <- length(dataFrames)
+  valString <- names(dataFrames)[datalen]
+  val <- eval(parse(text=valString))
+  Ystring <- deparse(substitute(Y))
+  if (datalen == 1){
+    print('Hello world')
+  }
+  listdata <- divVal(dataFrames,val)
+  tri(listdata,Ystring)
+  
+}
+arbre(train1,Survived)
+
+for (i in c('foo','bar')){
+  print(i)
+}
 
