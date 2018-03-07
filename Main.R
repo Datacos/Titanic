@@ -5,8 +5,8 @@
 library(rpart)
 library(readr)
 
-setwd("./TER/trunk/Data")
-train <- read_csv("Data/train.csv")
+setwd("./TER/Titanic.git/trunk/Data")
+train <- read_csv("train.csv")
 attach(train)
 
 # Taille de notre échantillon :
@@ -154,7 +154,11 @@ gini<-function(dataFrames,Ystring){
     col <- eval(parse(text=i))
     d = err(dataFrames,Ystring,col)
     list = unionData(divVal(dataFrames,col),d)
+    print(list)
     for(j in 1:2){
+      if (is.null(list[[j]])){
+        break()
+      }
       m = length(t(list[[j]][Ystring]))
       card = table(list[[j]][Ystring])
       p=(1/m)*card
