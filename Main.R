@@ -4,6 +4,7 @@
 
 library(rpart)
 library(readr)
+library(randomForest)
 
 setwd("./TER/Titanic.git/trunk/Data")
 train <- read_csv("train.csv")
@@ -78,12 +79,15 @@ train$catAge[train$catAge > 60] = 4
 
 attach(train)
 
+# plot des variables continues :
 plot(Age,Fare)
 
+# Utilisation du package R rpart, cart:
 fit <- rpart(Survived ~ hasCabin + catAge + catFare + Sex + Parch +Pclass + SibSp +Embarked, data = train, method = 'class',control = rpart.control(minsplit = 30, cp=0.005))
 plot(fit)
 text(fit)
 
+# Notre propre arbre décisionel :
 train1 = subset(train,select = -c(PassengerId,Age,Ticket,Fare,Cabin,Name))
 
 div<-function(dataFrame,X,x){
@@ -98,13 +102,6 @@ divVal<-function(dataFrames,val){
   }
   names(list1) <- unique(val)
   return(list1)
-}
-
-tri<-function(listdata,Ystring){
-  listLen = length(listdata)
-  for (i in 1:listLen){
-    print(table(listdata[[i]][Ystring]))
-  }
 }
 
 myMax<-function(x){
@@ -123,9 +120,12 @@ err<-function(dataFrames,Ystring,col){
   list = divVal(dataFrames,col)
   vals = names(list)
   n = length(dataFrames[Ystring])
+  divCol = divVal(dataFrames,col)
   for(i in vals){
-    divCol = divVal(dataFrames,col)
-    d[i] = myMax(table(divCol[[i]][Ystring]))
+    table = table(divCol[[i]][Ystring])
+    print(table)
+    print(divCol[[i]][Ystring])
+    d[i] = myMax(table)
   }
   return(d)
 }
@@ -148,15 +148,16 @@ gini<-function(dataFrames,Ystring){
   cols <- names(dataFrames)[names(dataFrames) != Ystring]
   G = list()
   p = c()
+  min = 1
+  gini = NULL
   for (i in cols) {
     vals = c(unique(dataFrames[i]))
-    print(vals)
     col <- eval(parse(text=i))
     d = err(dataFrames,Ystring,col)
     list = unionData(divVal(dataFrames,col),d)
-    print(list)
     for(j in 1:2){
       if (is.null(list[[j]])){
+        G[[i]][j]=1
         break()
       }
       m = length(t(list[[j]][Ystring]))
@@ -164,28 +165,36 @@ gini<-function(dataFrames,Ystring){
       p=(1/m)*card
       G[[i]][j] = 1 - sum(p^2)
     }
+    if (sum(G[[i]]) < min) {
+      min = sum(G[[i]])
+      gini[1] = i
+      gini[2] = min
+      gini[3] = unique(list[[1]][i])
+      gini[4] = unique(list[[2]][i])
+    }
   }
-  return(G)
+  return(gini)
 }
 
-G = gini(train1,'Survived')
-
-table(div(train,hasCabin,0)$Survived)
-
-arbre<-function(dataFrames,Y,node = 1){
+arbre<-function(dataFrames,Y,node,arbreList){
   datalen <- length(dataFrames)
-  valString <- names(dataFrames)[datalen]
-  val <- eval(parse(text=valString))
+  #valString <- names(dataFrames)[datalen]
+  #val <- eval(parse(text=valString))
   Ystring <- deparse(substitute(Y))
-  if (datalen == 1){
-    print('Hello world')
+  gini(dataFrames,Ystring)
+  if (datalen == node){
+    return(arbreList)
   }
-  listdata <- divVal(dataFrames,val)
-  tri(listdata,Ystring)
-  
+  #listdata <- divVal(dataFrames,val)
 }
-arbre(train1,Survived)
+arbre1 = arbre(train1,Survived)
 
-d = err(train1,'Survived',Pclass)
-pclassDiv = divVal(train1,Pclass)
-union = unionData(pclassDiv,d)
+set.seed(415)
+fit2 <- randomForest(Survived ~ factor(Sex) + factor(Embarked) + hasCabin + catAge + catFare + SibSp + Parch + Pclass,
+                     data = train1,
+                     importance = TRUE,
+                     ntree = 2000)
+
+
+plot(fit2)
+varImpPlot(fit2)
