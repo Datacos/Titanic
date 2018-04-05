@@ -1,2 +1,3 @@
 http://www.grappa.univ-lille3.fr/polys/apprentissage/sortie004.html
 http://dataaspirant.com/2017/05/22/random-forest-algorithm-machine-learing/
+Autre jeu de donnée: https://www.kaggle.com/alopez247/pokemon
